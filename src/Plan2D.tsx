@@ -56,7 +56,9 @@ function WindowH({ x1, x2, y }: { x1: number; x2: number; y: number }) {
 }
 
 function FacadeSliderH({ x1, x2, y }: { x1: number; x2: number; y: number }) {
-  const offset = y === 0 ? 1 : -1
+  // `y` is always the upper edge of the exterior wall footprint. Both tracks
+  // must therefore inset in the positive direction to remain on the wall.
+  const offset = 1
   const mid = (x1 + x2) / 2
   return <g className="facade-slider">
     <line x1={sx(x1)} y1={sy(y) + offset * 2} x2={sx(x2)} y2={sy(y) + offset * 2} />
@@ -68,7 +70,9 @@ function FacadeSliderH({ x1, x2, y }: { x1: number; x2: number; y: number }) {
 }
 
 function WindowV({ x, y1, y2, high = false }: { x: number; y1: number; y2: number; high?: boolean }) {
-  const offset = x === 0 ? 1 : -1
+  // `x` is the left edge of the exterior wall footprint, including the right
+  // facade at x=8.16. Inset positively instead of shifting into the room.
+  const offset = 1
   return <g className={`window-symbol ${high ? 'high-window' : ''}`}><line x1={sx(x) + offset * 2} y1={sy(y1)} x2={sx(x) + offset * 2} y2={sy(y2)} /><line x1={sx(x) + offset * 7} y1={sy(y1)} x2={sx(x) + offset * 7} y2={sy(y2)} /><line x1={sx(x) - 3} y1={sy(y1)} x2={sx(x) + 10} y2={sy(y1)} className="jamb" /><line x1={sx(x) - 3} y1={sy(y2)} x2={sx(x) + 10} y2={sy(y2)} className="jamb" /></g>
 }
 

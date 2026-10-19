@@ -27,16 +27,30 @@ const fromRow = (row: ProjectRow, access: ProjectRecord['access'] = 'editor'): P
 
 export class SupabaseProjectRepository implements ProjectRepository {
   readonly kind = 'supabase' as const
-  readonly requiresAuth = true
+  readonly requiresAuth: boolean
   private client: SupabaseClient
+  private automaticSignIn: Promise<void> | null = null
 
-  constructor(url: string, anonKey: string) {
+  constructor(url: string, anonKey: string, private automaticAuth?: { email: string; password: string }) {
+    this.requiresAuth = !automaticAuth
     this.client = createClient(url, anonKey, {
       auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
     })
   }
 
+  private async ensureAutomaticSession() {
+    const { data } = await this.client.auth.getSession()
+    if (data.session || !this.automaticAuth) return
+    if (!this.automaticSignIn) {
+      this.automaticSignIn = this.client.auth.signInWithPassword(this.automaticAuth).then(({ error }) => {
+        if (error) throw error
+      }).finally(() => { this.automaticSignIn = null })
+    }
+    await this.automaticSignIn
+  }
+
   async currentUserEmail() {
+    await this.ensureAutomaticSession()
     const { data } = await this.client.auth.getUser()
     return data.user?.email ?? null
   }
@@ -52,6 +66,7 @@ export class SupabaseProjectRepository implements ProjectRepository {
   }
 
   async signOut() {
+    if (this.automaticAuth) return
     const { error } = await this.client.auth.signOut()
     if (error) throw error
   }
