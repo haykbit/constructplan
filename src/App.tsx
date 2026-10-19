@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Box, Check, Columns2, Copy, ExternalLink, House, LogOut, Minus, Move3D, Plus, RotateCcw, RotateCw, Ruler, Save, Trash2, UserPlus, X } from 'lucide-react'
 import { FURNITURE_CATALOG, HOUSE, type DesignState, type FurnitureItem, type FurnitureKind, type VisibilityKey } from './model'
-import { newProjectDocument, normaliseSlug, projectRepository, ProjectAuthRequiredError, type ProjectSummary, type ProjectView, type SaveState } from './projects'
+import { projectRepository, ProjectAuthRequiredError, type ProjectSummary, type ProjectView, type SaveState } from './projects'
 import { useProjectSession } from './projects/useProjectSession'
 import { getProjectTemplate } from './templates'
 
@@ -161,7 +161,7 @@ function InviteDialog({ projectId, slug, onClose }: { projectId: string; slug: s
     setError('')
     try {
       await projectRepository.invite(projectId, email, role)
-      setMessage(projectRepository.kind === 'local' ? 'Acceso simulado en desarrollo local.' : 'Acceso preparado. Comparte el enlace del proyecto con el cliente.')
+      setMessage(projectRepository.kind === 'local' ? 'Acceso simulado en desarrollo local.' : 'Correo autorizado. El cliente podrá entrar con su magic link.')
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'No se pudo preparar el acceso')
     } finally {
@@ -175,7 +175,7 @@ function InviteDialog({ projectId, slug, onClose }: { projectId: string; slug: s
   return <div className="dialog-backdrop" role="presentation" onPointerDown={(event) => { if (event.target === event.currentTarget) onClose() }}><section className="access-dialog" role="dialog" aria-modal="true" aria-label="Acceso al proyecto">
     <header><div><p className="eyebrow">ACCESO</p><h2>Compartir proyecto</h2></div><button onClick={onClose} aria-label="Cerrar"><X size={16} /></button></header>
     <form onSubmit={invite}><label>Correo autorizado<input required type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="cliente@correo.com" /></label><label>Permisos<select value={role} onChange={(event) => setRole(event.target.value as 'editor' | 'viewer')}><option value="editor">Puede editar</option><option value="viewer">Solo acceso privado</option></select></label><button className="primary-action" disabled={submitting}>{submitting ? 'Preparando…' : 'Autorizar correo'}</button></form>
-    <div className="share-links"><button onClick={() => { void copy(editorUrl) }}><Copy size={14} /><span><strong>Enlace de edición</strong><small>{editorUrl}</small></span></button><button onClick={() => { void copy(presentationUrl) }}><ExternalLink size={14} /><span><strong>Presentación pública</strong><small>{presentationUrl}</small></span></button></div>
+    <div className="share-links"><button onClick={() => { void copy(editorUrl) }}><Copy size={14} /><span><strong>Enlace de edición</strong><small>{editorUrl}</small></span></button><button onClick={() => { void copy(presentationUrl) }}><ExternalLink size={14} /><span><strong>Presentación privada</strong><small>{presentationUrl}</small></span></button></div>
     {message && <p className="dialog-message">{message}</p>}{error && <p className="form-error">{error}</p>}
   </section></div>
 }
@@ -187,7 +187,7 @@ function ProjectEditor({ slug, view }: { slug: string; view: ProjectView }) {
   useEffect(() => setMode(view === 'presentation' ? '3d' : 'split'), [view])
   if (session.loading) return <main className="system-page"><div className="loading-mark">Cargando proyecto…</div></main>
   if (session.authRequired) return <AuthScreen onAuthenticated={session.reload} />
-  if (session.error || !session.project) return <main className="system-page"><section className="system-card"><h1>No se pudo abrir el proyecto</h1><p>{session.error}</p><button className="primary-action" onClick={() => navigate('/proyectos')}>Volver a proyectos</button></section></main>
+  if (session.error || !session.project || !session.design) return <main className="system-page"><section className="system-card"><h1>No se pudo abrir el proyecto</h1><p>{session.error || 'El proyecto no contiene un diseño válido'}</p><button className="primary-action" onClick={() => navigate('/proyectos')}>Volver a proyectos</button></section></main>
   const readOnly = view === 'presentation' || session.project.access === 'viewer'
   return <div className="variant-a">
     <Header mode={mode} setMode={setMode} projectName={session.project.name} readOnly={readOnly} />
@@ -212,9 +212,6 @@ function ProjectDashboard() {
   const [loading, setLoading] = useState(true)
   const [authRequired, setAuthRequired] = useState(false)
   const [error, setError] = useState('')
-  const [name, setName] = useState('')
-  const [slug, setSlug] = useState('')
-  const [creating, setCreating] = useState(false)
   const load = async () => {
     setLoading(true)
     try {
@@ -229,28 +226,14 @@ function ProjectDashboard() {
     }
   }
   useEffect(() => { void load(); return projectRepository.onAuthStateChange(() => { void load() }) }, [])
-  const suggestedSlug = useMemo(() => normaliseSlug(name), [name])
-  const create = async (event: FormEvent) => {
-    event.preventDefault()
-    setCreating(true)
-    setError('')
-    try {
-      const created = await projectRepository.create({ name, slug: normaliseSlug(slug || suggestedSlug), document: newProjectDocument() })
-      navigate(`/proyectos/${created.slug}`)
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'No se pudo crear el proyecto')
-    } finally {
-      setCreating(false)
-    }
-  }
   if (authRequired) return <AuthScreen onAuthenticated={() => { void load() }} />
   return <main className="dashboard-page">
     <header className="dashboard-header"><div className="brand"><span className="brand-mark"><House size={18} /></span><div><strong>ConstructPlan</strong><span>Proyectos</span></div></div>{projectRepository.requiresAuth && <button className="quiet-action" onClick={() => { void projectRepository.signOut() }}><LogOut size={14} /> Salir</button>}</header>
     <div className="dashboard-content">
-      <section><p className="eyebrow">ESTUDIO</p><h1>Proyectos de vivienda</h1><p className="dashboard-intro">Cada proyecto utiliza el mismo editor 2D/3D y conserva su propio diseño, historial y publicación.</p>
+      <section><p className="eyebrow">ESTUDIO</p><h1>Proyectos de vivienda</h1><p className="dashboard-intro">Los proyectos y sus diseños se cargan desde Supabase.</p>
+        {error && <p className="form-error">{error}</p>}
         {loading ? <p>Cargando…</p> : <div className="project-grid">{projects.map((project) => <button key={project.id} className="project-card" onClick={() => navigate(`/proyectos/${project.slug}`)}><span>{project.name}</span><small>Revisión {project.revision}{project.revision > project.publishedRevision ? ' · cambios sin publicar' : ' · publicado'}</small><time>{new Date(project.updatedAt).toLocaleString('es-ES')}</time></button>)}</div>}
       </section>
-      <form className="create-project-card" onSubmit={create}><p className="eyebrow">NUEVO PROYECTO</p><h2>Crear desde la plantilla base</h2><label>Nombre<input required value={name} onChange={(event) => { setName(event.target.value); setSlug(normaliseSlug(event.target.value)) }} placeholder="Casa Martínez" /></label><label>URL<input required value={slug} onChange={(event) => setSlug(normaliseSlug(event.target.value))} placeholder={suggestedSlug || 'casa-martinez'} /><small>/proyectos/{slug || suggestedSlug || 'casa-martinez'}</small></label>{error && <p className="form-error">{error}</p>}<button className="primary-action" disabled={creating || !name || !slug}>{creating ? 'Creando…' : 'Crear proyecto'}</button></form>
     </div>
   </main>
 }
@@ -266,7 +249,7 @@ export default function App() {
     return { kind: 'legacy' as const }
   }, [pathname])
   useEffect(() => {
-    if (route.kind === 'legacy') navigate('/proyectos/casa-gemma')
+    if (route.kind === 'legacy') navigate('/proyectos')
   }, [route.kind])
   if (route.kind === 'project') return <ProjectEditor slug={route.slug} view={route.view} />
   if (route.kind === 'dashboard') return <ProjectDashboard />

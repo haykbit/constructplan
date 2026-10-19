@@ -59,6 +59,12 @@ Abrir la URL que indique Vite. La aplicación ofrece tres vistas desde la cabece
 
 En el visor 3D utiliza la paleta flotante **Capas 3D** para ocultar cubierta, envolvente, tabiques, mobiliario o entorno.
 
+## Datos del proyecto
+
+Casa Gemma vive en Supabase como el proyecto `casa-gemma`. Su borrador, versión publicada, mobiliario y ajustes editables se guardan en documentos JSONB con historial de revisiones. La aplicación no crea una copia local ni usa un diseño inicial como respaldo: si el proyecto no existe o el usuario no tiene acceso, muestra el error correspondiente.
+
+El editor y la presentación privada requieren acceso por magic link y un correo previamente autorizado. La presentación publicada se lee desde una tabla separada que nunca expone el borrador privado.
+
 ## Tecnología 3D
 
 El editor utiliza React, React Three Fiber y Three.js/WebGL 2 con materiales PBR, sombras, ACES Filmic y texturas repetibles. Esta base es adecuada para edición paramétrica, recorrido y presentación web en tiempo real. Para el salto a visualización comercial final se prevé un flujo Blender/Revit/Archicad → glTF/GLB, con mobiliario y vegetación modelados, mapas PBR completos y compresión KTX2/Draco o Meshopt.

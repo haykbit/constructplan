@@ -1,8 +1,6 @@
 import { LocalProjectRepository } from './localRepository'
 import { SupabaseProjectRepository } from './supabaseRepository'
-import type { ProjectDocument, ProjectRepository } from './types'
-import { initialDesign, toPersistedDesign } from '../model'
-import { DEFAULT_TEMPLATE_ID } from '../templates'
+import type { ProjectRepository } from './types'
 
 export * from './types'
 
@@ -12,13 +10,3 @@ const supabasePublishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as 
 export const projectRepository: ProjectRepository = supabaseUrl && supabasePublishableKey
   ? new SupabaseProjectRepository(supabaseUrl, supabasePublishableKey)
   : new LocalProjectRepository()
-
-export const newProjectDocument = (): ProjectDocument => ({
-  schemaVersion: 1,
-  templateId: DEFAULT_TEMPLATE_ID,
-  design: toPersistedDesign(initialDesign),
-})
-
-export function normaliseSlug(value: string) {
-  return value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
-}

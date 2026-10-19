@@ -78,6 +78,8 @@ export class SupabaseProjectRepository implements ProjectRepository {
 
   async load(slug: string, view: ProjectView): Promise<ProjectRecord> {
     if (view === 'presentation') {
+      if (!await this.currentUserEmail()) throw new ProjectAuthRequiredError()
+      await this.claimInvitations()
       const { data, error } = await this.client.from('project_publications').select('*').eq('slug', slug).maybeSingle()
       if (error) throw error
       if (!data) throw new ProjectNotFoundError(slug)
@@ -90,7 +92,7 @@ export class SupabaseProjectRepository implements ProjectRepository {
         revision: Number(data.revision),
         publishedRevision: Number(data.revision),
         updatedAt: data.published_at,
-        access: 'public',
+        access: 'viewer',
       }
     }
     if (!await this.currentUserEmail()) throw new ProjectAuthRequiredError()

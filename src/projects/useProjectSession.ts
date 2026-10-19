@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
-import { hydrateDesign, initialDesign, toPersistedDesign, type DesignState } from '../model'
+import { hydrateDesign, toPersistedDesign, type DesignState } from '../model'
 import { projectRepository } from '.'
 import { ProjectAuthRequiredError, ProjectConflictError, type ProjectDocument, type ProjectRecord, type ProjectView, type SaveState } from './types'
 
@@ -18,7 +18,7 @@ const documentFor = (templateId: string, design: DesignState): ProjectDocument =
 export function useProjectSession(slug: string, view: ProjectView) {
   const [session, setSession] = useState<SessionState>({ loading: true, authRequired: false, error: null })
   const [project, setProject] = useState<ProjectRecord | null>(null)
-  const [design, setDesign] = useState<DesignState>(initialDesign)
+  const [design, setDesign] = useState<DesignState | null>(null)
   const [saveState, setSaveState] = useState<SaveState>('idle')
   const [saveMessage, setSaveMessage] = useState('')
   const [reloadToken, setReloadToken] = useState(0)
@@ -39,6 +39,7 @@ export function useProjectSession(slug: string, view: ProjectView) {
   useEffect(() => {
     let cancelled = false
     setSession({ loading: true, authRequired: false, error: null })
+    setDesign(null)
     setSaveState('idle')
     void projectRepository.load(slug, view).then((loaded) => {
       if (cancelled) return
@@ -88,7 +89,7 @@ export function useProjectSession(slug: string, view: ProjectView) {
   }, [view])
 
   useEffect(() => {
-    if (!project || session.loading || view !== 'editor' || project.access === 'viewer') return
+    if (!project || !design || session.loading || view !== 'editor' || project.access === 'viewer') return
     const document = documentFor(project.draft.templateId, design)
     const serialised = JSON.stringify(document)
     if (serialised === lastSavedRef.current) return
@@ -106,6 +107,7 @@ export function useProjectSession(slug: string, view: ProjectView) {
     if (!project || view !== 'editor' || project.access === 'viewer') return
     return projectRepository.subscribe(project.id, (event) => {
       if (event.revision <= revisionRef.current) return
+      if (!designRef.current) return
       const localDocument = documentFor(project.draft.templateId, designRef.current)
       if (JSON.stringify(localDocument) !== lastSavedRef.current) {
         setSaveState('conflict')
@@ -132,7 +134,7 @@ export function useProjectSession(slug: string, view: ProjectView) {
 
   const publish = useCallback(async () => {
     const loaded = projectRef.current
-    if (!loaded || view !== 'editor' || loaded.access === 'viewer') return
+    if (!loaded || !designRef.current || view !== 'editor' || loaded.access === 'viewer') return
     if (timerRef.current) window.clearTimeout(timerRef.current)
     const document = documentFor(loaded.draft.templateId, designRef.current)
     await persist(document)

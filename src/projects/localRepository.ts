@@ -1,17 +1,9 @@
-import { initialDesign, toPersistedDesign } from '../model'
 import type { ProjectCreateInput, ProjectDocument, ProjectRecord, ProjectRepository, ProjectSummary, ProjectView, RevisionEvent } from './types'
 import { ProjectConflictError, ProjectNotFoundError } from './types'
-import { DEFAULT_TEMPLATE_ID } from '../templates'
 
-const INDEX_KEY = 'forma:projects:index:v1'
-const projectKey = (slug: string) => `forma:project:${slug}:v1`
-const revisionKey = (id: string) => `forma:project:${id}:revisions:v1`
-
-const defaultDocument = (): ProjectDocument => ({
-  schemaVersion: 1,
-  templateId: DEFAULT_TEMPLATE_ID,
-  design: toPersistedDesign(initialDesign),
-})
+const INDEX_KEY = 'constructplan:projects:index:v2'
+const projectKey = (slug: string) => `constructplan:project:${slug}:v2`
+const revisionKey = (id: string) => `constructplan:project:${id}:revisions:v2`
 
 function clone<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T
@@ -33,32 +25,6 @@ function writeProject(record: ProjectRecord) {
   localStorage.setItem(INDEX_KEY, JSON.stringify([...slugs]))
 }
 
-function ensureSeed(): ProjectRecord {
-  const raw = localStorage.getItem(projectKey('casa-gemma'))
-  if (raw) {
-    const stored = JSON.parse(raw) as ProjectRecord
-    if (!stored.access) {
-      stored.access = 'owner'
-      writeProject(stored)
-    }
-    return stored
-  }
-  const document = defaultDocument()
-  const record: ProjectRecord = {
-    id: 'local-casa-gemma',
-    slug: 'casa-gemma',
-    name: 'Casa Gemma',
-    draft: clone(document),
-    published: clone(document),
-    revision: 1,
-    publishedRevision: 1,
-    updatedAt: now(),
-    access: 'owner',
-  }
-  writeProject(record)
-  return record
-}
-
 function findById(id: string): ProjectRecord | null {
   for (const slug of readIndex()) {
     const raw = localStorage.getItem(projectKey(slug))
@@ -73,10 +39,6 @@ function findById(id: string): ProjectRecord | null {
 export class LocalProjectRepository implements ProjectRepository {
   readonly kind = 'local' as const
   readonly requiresAuth = false
-
-  constructor() {
-    ensureSeed()
-  }
 
   async currentUserEmail() { return null }
   onAuthStateChange() { return () => undefined }
@@ -93,7 +55,6 @@ export class LocalProjectRepository implements ProjectRepository {
   }
 
   async load(slug: string, view: ProjectView): Promise<ProjectRecord> {
-    if (slug === 'casa-gemma') ensureSeed()
     const raw = localStorage.getItem(projectKey(slug))
     if (!raw) throw new ProjectNotFoundError(slug)
     const record = JSON.parse(raw) as ProjectRecord
@@ -144,7 +105,7 @@ export class LocalProjectRepository implements ProjectRepository {
 
   subscribe(projectId: string, listener: (event: RevisionEvent) => void) {
     const handler = (event: StorageEvent) => {
-      if (!event.key?.startsWith('forma:project:') || !event.newValue) return
+      if (!event.key?.startsWith('constructplan:project:') || !event.newValue) return
       const record = JSON.parse(event.newValue) as ProjectRecord
       if (record.id === projectId) listener({ revision: record.revision, document: clone(record.draft), updatedAt: record.updatedAt })
     }

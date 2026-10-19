@@ -18,10 +18,10 @@ const templates: Record<string, ProjectTemplate> = {
   },
 }
 
-export const DEFAULT_TEMPLATE_ID = 'casa-gemma-v1'
-
 export function getProjectTemplate(templateId: string) {
-  return templates[templateId] ?? templates[DEFAULT_TEMPLATE_ID]
+  const template = templates[templateId]
+  if (!template) throw new Error(`No existe el visor ${templateId}`)
+  return template
 }
 
 export function listProjectTemplates() {
