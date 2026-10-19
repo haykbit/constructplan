@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="es">
+  <body style="margin:0;background:#deddd7;font-family:Arial,Helvetica,sans-serif;color:#24251f;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#deddd7;padding:32px 12px;">
+      <tr><td align="center">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;background:#faf9f5;border:1px solid #d8d5cc;border-radius:16px;overflow:hidden;">
+          <tr><td style="padding:24px 32px;background:#171814;color:#f6f4ee;font-size:20px;font-weight:700;letter-spacing:-0.4px;">ConstructPlan</td></tr>
+          <tr><td style="padding:36px 32px 16px;font-size:28px;line-height:1.2;font-weight:700;">Accede a tu proyecto</td></tr>
+          <tr><td style="padding:0 32px 24px;color:#64645c;font-size:16px;line-height:1.6;">Pulsa el botón para abrir el proyecto que han compartido contigo. El enlace es personal, seguro y de un solo uso.</td></tr>
+          <tr><td align="center" style="padding:0 32px 28px;"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#171814;color:#ffffff;text-decoration:none;font-size:15px;font-weight:700;padding:14px 24px;border-radius:9px;">Ver proyecto</a></td></tr>
+          <tr><td style="padding:0 32px 28px;color:#77776d;font-size:13px;line-height:1.6;">Si el botón no funciona, usa este código: <strong style="color:#24251f;letter-spacing:1px;">{{ .Token }}</strong></td></tr>
+          <tr><td style="padding:20px 32px;border-top:1px solid #e4e1d9;color:#8a8981;font-size:12px;line-height:1.5;">Si no solicitaste este acceso, puedes ignorar el mensaje. No reenvíes este correo.</td></tr>
+        </table>
+      </td></tr>
+    </table>
+  </body>
+</html>
