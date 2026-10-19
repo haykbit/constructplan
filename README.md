@@ -1,6 +1,6 @@
-# Casa Gemma — prototipo de anteproyecto
+# ConstructPlan — Casa Gemma
 
-Prototipo web desechable para revisar una primera distribución 2D y su volumen 3D sincronizado.
+Plataforma web para gestionar anteproyectos independientes. Casa Gemma es el primer proyecto y combina una distribución 2D con su volumen 3D sincronizado.
 
 ## Revisión R13
 

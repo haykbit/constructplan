@@ -1,9 +1,9 @@
-# Despliegue de Forma
+# Despliegue de ConstructPlan
 
 La aplicación tiene dos adaptadores de proyecto:
 
 - **Local**: se activa cuando no existen variables de Supabase. Guarda los proyectos en `localStorage` y permite desarrollar sin servicios externos.
-- **Supabase**: se activa al definir `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY`. Usa PostgreSQL, autenticación por enlace, RLS, revisiones y sincronización en tiempo real.
+- **Supabase**: se activa al definir `VITE_SUPABASE_URL` y `VITE_SUPABASE_PUBLISHABLE_KEY`. Usa PostgreSQL, autenticación por enlace, RLS, revisiones y sincronización en tiempo real.
 
 ## 1. Crear la base de datos gratuita
 
@@ -32,13 +32,13 @@ Copiar `.env.example` a `.env.local` durante el desarrollo:
 cp .env.example .env.local
 ```
 
-Completar únicamente la URL y la clave pública `anon`. La clave `service_role` no debe colocarse nunca en Vite ni enviarse al navegador.
+Completar únicamente la URL y la clave `publishable`. Las claves `secret` y `service_role` no deben colocarse nunca en Vite ni enviarse al navegador.
 
 ## 3. Desplegar en Vercel
 
 1. Subir el repositorio a GitHub.
 2. Importarlo en Vercel como proyecto Vite.
-3. Añadir `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` en Preview y Production.
+3. Añadir `VITE_SUPABASE_URL` y `VITE_SUPABASE_PUBLISHABLE_KEY` en Preview y Production.
 4. Desplegar.
 
 `vercel.json` hace que las rutas `/proyectos/:slug` y `/presentacion/:slug` funcionen al abrirlas directamente.

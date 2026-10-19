@@ -1,5 +1,5 @@
 {
-  "name": "casa-gemma-prototype",
+  "name": "constructplan",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -7,7 +7,7 @@
     "dev": "vite --host 127.0.0.1",
     "build": "tsc -b && vite build",
     "preview": "vite preview --host 127.0.0.1",
-    "validate:layout": "esbuild src/model.ts --format=esm --platform=node --outfile=/tmp/casa-gemma-layout.mjs && node -e \"import('/tmp/casa-gemma-layout.mjs').then(()=>console.log('layout-clear'))\""
+    "validate:layout": "esbuild src/model.ts --format=esm --platform=node --outfile=/tmp/constructplan-layout.mjs && node -e \"import('/tmp/constructplan-layout.mjs').then(()=>console.log('layout-clear'))\""
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",
@@ -23,6 +23,7 @@
     "@types/react-dom": "^19.1.9",
     "@types/three": "^0.180.0",
     "@vitejs/plugin-react": "^5.0.4",
+    "supabase": "^2.121.0",
     "typescript": "^5.9.2",
     "vite": "^7.1.7"
   }

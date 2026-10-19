@@ -11,7 +11,7 @@ function Header({ mode, setMode, projectName, readOnly }: { mode: Mode; setMode:
   return <header className="app-header">
     <div className="brand">
       <span className="brand-mark"><House size={18} /></span>
-      <div><strong>Forma</strong><span>{projectName}{readOnly ? ' · presentación' : ''}</span></div>
+      <div><strong>ConstructPlan</strong><span>{projectName}{readOnly ? ' · presentación' : ''}</span></div>
     </div>
     <nav className="mode-tabs" aria-label="Vistas del proyecto">
       <button className={mode === '2d' ? 'active' : ''} onClick={() => setMode('2d')}><Ruler size={15} /> Plano 2D</button>
@@ -128,7 +128,7 @@ function AuthScreen({ onAuthenticated }: { onAuthenticated: () => void }) {
     <span className="system-mark"><House size={22} /></span>
     <h1>Acceso al proyecto</h1>
     {sent ? <><p>Te hemos enviado un enlace de acceso a <strong>{email}</strong>.</p><button className="primary-action" onClick={() => setSent(false)}>Usar otro correo</button></> : <form onSubmit={submit}>
-      <p>Introduce el correo autorizado para abrir los proyectos de Forma.</p>
+      <p>Introduce el correo autorizado para abrir los proyectos de ConstructPlan.</p>
       <label>Correo electrónico<input type="email" required value={email} onChange={(event) => setEmail(event.target.value)} placeholder="nombre@correo.com" /></label>
       {error && <p className="form-error">{error}</p>}
       <button className="primary-action" type="submit">Recibir enlace de acceso</button>
@@ -245,7 +245,7 @@ function ProjectDashboard() {
   }
   if (authRequired) return <AuthScreen onAuthenticated={() => { void load() }} />
   return <main className="dashboard-page">
-    <header className="dashboard-header"><div className="brand"><span className="brand-mark"><House size={18} /></span><div><strong>Forma</strong><span>Proyectos</span></div></div>{projectRepository.requiresAuth && <button className="quiet-action" onClick={() => { void projectRepository.signOut() }}><LogOut size={14} /> Salir</button>}</header>
+    <header className="dashboard-header"><div className="brand"><span className="brand-mark"><House size={18} /></span><div><strong>ConstructPlan</strong><span>Proyectos</span></div></div>{projectRepository.requiresAuth && <button className="quiet-action" onClick={() => { void projectRepository.signOut() }}><LogOut size={14} /> Salir</button>}</header>
     <div className="dashboard-content">
       <section><p className="eyebrow">ESTUDIO</p><h1>Proyectos de vivienda</h1><p className="dashboard-intro">Cada proyecto utiliza el mismo editor 2D/3D y conserva su propio diseño, historial y publicación.</p>
         {loading ? <p>Cargando…</p> : <div className="project-grid">{projects.map((project) => <button key={project.id} className="project-card" onClick={() => navigate(`/proyectos/${project.slug}`)}><span>{project.name}</span><small>Revisión {project.revision}{project.revision > project.publishedRevision ? ' · cambios sin publicar' : ' · publicado'}</small><time>{new Date(project.updatedAt).toLocaleString('es-ES')}</time></button>)}</div>}

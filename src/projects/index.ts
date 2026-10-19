@@ -7,10 +7,10 @@ import { DEFAULT_TEMPLATE_ID } from '../templates'
 export * from './types'
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined
+const supabasePublishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined
 
-export const projectRepository: ProjectRepository = supabaseUrl && supabaseAnonKey
-  ? new SupabaseProjectRepository(supabaseUrl, supabaseAnonKey)
+export const projectRepository: ProjectRepository = supabaseUrl && supabasePublishableKey
+  ? new SupabaseProjectRepository(supabaseUrl, supabasePublishableKey)
   : new LocalProjectRepository()
 
 export const newProjectDocument = (): ProjectDocument => ({
